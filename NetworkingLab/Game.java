@@ -40,11 +40,14 @@ public class Game implements Serializable{
      return full;
    }
 
-   public boolean checkWin(){
-     if( win1 == true || win2 == true)
-      return true;
-     else
-      return false;
+   public void checkWin(){
+     if(checkTicTacToe() == 1){
+      wins1++;
+      resettable();
+    } else if(checkTicTacToe() == -1){
+      wins2++;
+      resettable();
+    }
    }
 
    public boolean makeMove(int r, int c) {
@@ -130,9 +133,7 @@ public class Game implements Serializable{
    }*/
 
    public int checkTicTacToe(){
-        if(checkFull() == true)
-          return 2;
-          
+
         if(table[0][0] == 1 && table[0][1] == 1 && table[0][2] == 1)
           return 1;
         if(table[1][0] == 1 && table[1][1] == 1 && table[1][2] == 1)
@@ -167,6 +168,9 @@ public class Game implements Serializable{
         if(table[0][2] == -1 && table[1][1] == -1 && table[2][0] == -1)
           return -1;
 
+        if(checkFull() == true)
+          return 2;
+
 
 
 
@@ -185,4 +189,12 @@ public class Game implements Serializable{
     public boolean isMyTurn(String player){
       return player.equals(turn);
     }
+
+    public int getServerWins() {
+		return wins1;
+	}
+
+	public int getClientWins() {
+		return wins2;
+	}
 }

@@ -5,6 +5,9 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 public class Client extends JPanel implements ActionListener, Serializable{
 
 
@@ -38,6 +41,7 @@ public class Client extends JPanel implements ActionListener, Serializable{
         public void mousePressed(MouseEvent e) {
           int x = e.getX();
           int y = e.getY();
+          playOSound();
 
           if (x > 20 && x < 620 && y > 20 && y < 620 && game.isMyTurn("client")) {
             int r = (y - 20) / 200;
@@ -58,28 +62,33 @@ public class Client extends JPanel implements ActionListener, Serializable{
         drawGameBoard(g);
 
         int res = checkWin();
+
         if(res!=0){
     			if (res == -1 ) {
-            g.setColor(new Color(247, 163, 163));
+            g.setColor(new Color(24, 204, 45));
             g.fillRect(140, 200, 270,150);
             g.setColor(Color.black);
     				g.drawString("You won!", 150, 300);
+            playWinSound();
 
     			} else if (res == 1) {
-            g.setColor(new Color(157, 204, 235));
+            g.setColor(new Color(255, 0, 0));
             g.fillRect(140, 200, 270,150);
             g.setColor(Color.black);
     				g.drawString("You lost!", 150, 300);
+            playLoseSound();
 
     			} else if (res == 2) {
-            g.setColor(new Color(247, 218, 186));
+            g.setColor(new Color(128, 240, 255));
             g.fillRect(140, 200, 250,150);
             g.setColor(Color.black);
     				g.drawString("Draw!", 150, 300);
+            playTieSound();
 
     			}
         }
-        g.drawString("P2: " + wins, 640, 100);
+        g.drawString("X: " + game.getServerWins(), 640, 100);
+        g.drawString("O: " + game.getClientWins(), 640, 150);
 
     }
 
@@ -116,11 +125,14 @@ public class Client extends JPanel implements ActionListener, Serializable{
   	}
 
     public int checkWin(){
-      if(game.checkTicTacToe() == -1){
+      int ret = game.checkTicTacToe();
+      if(ret == -1){
         wins++;
       }
-      return game.checkTicTacToe();
+      game.checkWin();
+      return ret;
     }
+
 
 
     public void poll() throws Exception{
@@ -136,7 +148,26 @@ public class Client extends JPanel implements ActionListener, Serializable{
       }
     }
 
-    public void actionPerformed(ActionEvent e) {
+    private void playWinSound() { playSound("sounds/win.wav"); }
+    private void playLoseSound() { playSound("sounds/lose.wav"); }
+    private void playTieSound() { playSound("sounds/tie.wav"); }
+    private void playXSound() { playSound("sounds/x.wav"); }
+    private void playOSound() { playSound("sounds/o.wav"); }
+
+
+    private void playSound(String filename) {
+  		try {
+  			URL url = this.getClass().getClassLoader().getResource(filename);
+  			Clip clip = AudioSystem.getClip();
+  			clip.open(AudioSystem.getAudioInputStream(url));
+  			clip.start();
+  		} catch (Exception e) {
+  			System.out.println(e);
+  		}
+  	}
+
+    public void actionPerformed(ActionEvent e){
+
     }
 
     public static void main(String[] args) throws Exception {
