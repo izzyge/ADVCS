@@ -1,8 +1,15 @@
-public class Item{
+import java.awt.*;
+import java.io.*;
+
+public class Item implements Serializable{
   private String name;
 
   public Item(String name){
     this.name = name;
+  }
+
+  public Item(){
+    name = "";
   }
 
   public String getName(){
@@ -22,5 +29,9 @@ public class Item{
 	//      }
   //
 	// }
+
+  public String toString(){
+    return name;
+  }
 
 }

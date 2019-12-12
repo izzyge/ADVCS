@@ -1,5 +1,8 @@
 import java.util.*;
-public class Location{
+import java.awt.*;
+import java.io.*;
+
+public class Location implements Serializable{
   private int x,y;
   public Location(int x, int y){
     this.x = x;
@@ -21,5 +24,5 @@ public class Location{
   public int getX(){ return x; }
   public int getY(){ return y; }
 
-  
+
 }

@@ -17,8 +17,8 @@ public class Server extends JPanel implements ActionListener, Serializable, KeyL
   	private Socket client;
   	private ObjectOutputStream out;
   	private ObjectInputStream in;
-    private BufferedImage computer, erin;
-    private Player p1;
+    private BufferedImage computer, erin, desk, mateen, life;
+    private Player p1, p2;
 
 
 
@@ -26,11 +26,15 @@ public class Server extends JPanel implements ActionListener, Serializable, KeyL
         this.setLayout(null);
         addKeyListener(this);
         game = new Game();
-        p1 = new Player();
+        p1 = game.getP1();
+        p2 = game.getP2();
 
         try {
           computer = ImageIO.read(new File("imgs/Computer.png"));
           erin = ImageIO.read(new File("imgs/erin.png"));
+          desk = ImageIO.read(new File("imgs/Desk.png"));
+          mateen = ImageIO.read(new File("imgs/mateen.png"));
+          life = ImageIO.read(new File("imgs/Life.png"));
         } catch (IOException ex){
 
         }
@@ -71,19 +75,30 @@ public class Server extends JPanel implements ActionListener, Serializable, KeyL
           Item value = game.getGrid().get(key);
           if(value != null){
             if(value.getName().equals("Computer")){
-              g.drawImage(computer, (r+1) * 100, (c+1) * 100, null);
+              g.drawImage(computer, (r) * 100, (c) * 100, null);
+            } else if(value.getName().equals("Desk")){
+              g.drawImage(desk, (r) * 100 + 6, (c) * 100 + 6, null);
             }
           }
         }
       }
+      g.setColor(Color.red);
+      g.drawImage(erin, game.getP1().getX(), game.getP1().getY(), null);
+      g.drawString(game.getItems() + " Computers", game.getP1().getX()+10, game.getP1().getY()-10);
+      for(int i = 0; i<game.getHealth(); i++){
+        g.drawImage(life, game.getP1().getX()+ 10 + (20*i) , game.getP1().getY()-5, null);
+      }
+      g.drawImage(mateen, game.getP2().getX(), game.getP2().getY(), null);
+      g.drawString(game.getItems2() + " Computers", game.getP2().getX()+10, game.getP2().getY()-10);
+      for(int i = 0; i<game.getHealth2(); i++){
+        g.drawImage(life, game.getP2().getX()+ 10 + (20*i) , game.getP2().getY()-5, null);
+      }
 
-      g.drawImage(erin, p1.getX(), p1.getY(), null);
-      //iterate through hash and draw based off value
   	}
 
     public void poll() throws Exception {
 
-      app = new ServerSocket(1024);
+      app = new ServerSocket(8080);
       client = app.accept();
 
       out = new ObjectOutputStream(client.getOutputStream());
@@ -101,9 +116,27 @@ public class Server extends JPanel implements ActionListener, Serializable, KeyL
 			out.reset();
 			out.writeObject(game);
 		} catch (Exception err) {
-			System.out.println(err);
+			// System.out.println(err);
 		}
 	}
+
+  public void check(){
+    int x = game.getP1().getX();
+    int y = game.getP1().getY();
+    Location current = new Location((x/100), (y/100));
+    Item item = game.getGrid().get(current);
+    if(item!= null){
+      if(item.toString().equals("Computer")){
+        game.collect();
+        game.removeItem(current);
+      } else if(item.toString().equals("Desk")){
+        game.getP1().hitObstacle();
+
+      }
+    }
+    sendGame();
+
+  }
 
   private void playSound(String filename) {
 		try {
@@ -117,20 +150,24 @@ public class Server extends JPanel implements ActionListener, Serializable, KeyL
 	}
 
   public void keyPressed(KeyEvent e) {
+
     if (e.getKeyCode()==38){//Up Arrow
-      p1.moveUp();
+      game.moveUp();
     }else if (e.getKeyCode()==40){//Down Arrow
-      p1.moveDown();
+      game.moveDown();
     } else if ( e.getKeyCode() == 39 ) { //right
-      p1.moveRight();
+      game.moveRight();
     }else if (e.getKeyCode()==37){//left Arrow
-      p1.moveLeft();
+      game.moveLeft();
     }
+    sendGame();
+    check();
     repaint();
   }
 
 
-  public void keyReleased(KeyEvent e){}
+  public void keyReleased(KeyEvent e){  }
+
   public void keyTyped(KeyEvent e){}
 
 
