@@ -84,4 +84,23 @@ public class Game implements Serializable{
 
   public int getItems(){ return p1.getItems(); }
   public int getItems2(){ return p2.getItems(); }
+
+  public int win(){
+    if(p1.win()){
+      return 1;
+    } else if(p2.win()){
+      return 2;
+    } else {
+      return 0;
+    }
+  }
+
+  public int lose(){
+    if(p1.lose())
+      return 1;
+    else if(p2.lose())
+      return 2;
+    else
+      return 0;
+  }
 }

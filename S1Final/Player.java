@@ -8,8 +8,8 @@ public class Player extends Item implements Serializable{
   private String name;
 
   public Player(){
-    x = 400;
-    y = 400;
+    x = 420;
+    y = 420;
     width = 70;
     height = 70;
     items = 0;
@@ -79,6 +79,20 @@ public class Player extends Item implements Serializable{
 
   public int getItems(){
     return items;
+  }
+
+  public boolean win(){
+    if(items>6){
+      return true;
+    }
+    return false;
+  }
+
+  public boolean lose(){
+    if(health.size()==0){
+      return true;
+    }
+    return false;
   }
 
 }

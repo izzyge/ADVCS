@@ -17,8 +17,9 @@ public class Client extends JPanel implements ActionListener, Serializable, KeyL
   	private Socket server;
   	private ObjectOutputStream out;
   	private ObjectInputStream in;
-    private BufferedImage computer, erin, desk, mateen, life;
+    private BufferedImage computer, erin, desk, mateen, life, bomb, win, lose;
     private Player p1, p2;
+    private int bombs;
 
 
 
@@ -28,6 +29,7 @@ public class Client extends JPanel implements ActionListener, Serializable, KeyL
         game = new Game();
         p1 = game.getP1();
         p2 = game.getP2();
+        bombs = 0;
 
         try {
           computer = ImageIO.read(new File("imgs/Computer.png"));
@@ -35,6 +37,9 @@ public class Client extends JPanel implements ActionListener, Serializable, KeyL
           desk = ImageIO.read(new File("imgs/Desk.png"));
           mateen = ImageIO.read(new File("imgs/mateen.png"));
           life = ImageIO.read(new File("imgs/Life.png"));
+          bomb = ImageIO.read(new File("imgs/Bomb.png"));
+          win = ImageIO.read(new File("imgs/Win.jpg"));
+          lose = ImageIO.read(new File("imgs/Lose.png"));
         } catch (IOException ex){
 
         }
@@ -50,6 +55,11 @@ public class Client extends JPanel implements ActionListener, Serializable, KeyL
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         drawGrid(g);
+        if(game.win()==2 || game.lose()==1){
+          g.drawImage(win,0,0,null);
+        } else if(game.win()==1 || game.lose()==2){
+          g.drawImage(lose,0,0,null);
+        }
 
     }
 
@@ -78,11 +88,13 @@ public class Client extends JPanel implements ActionListener, Serializable, KeyL
               g.drawImage(computer, (r) * 100, (c) * 100, null);
             } else if(value.getName().equals("Desk")){
               g.drawImage(desk, (r) * 100 + 6, (c) * 100 + 6, null);
+            } else if(value.getName().equals("Bomb")){
+              g.drawImage(bomb, (r) * 100, (c) * 100, null);
             }
           }
         }
       }
-      g.setColor(Color.red);
+      g.setColor(Color.white);
       g.drawImage(erin, game.getP1().getX(), game.getP1().getY(), null);
       g.drawString(game.getItems() + " Computers", game.getP1().getX()+10, game.getP1().getY()-10);
       for(int i = 0; i<game.getHealth(); i++){
@@ -136,8 +148,14 @@ public class Client extends JPanel implements ActionListener, Serializable, KeyL
       if(item.toString().equals("Computer")){
         game.collect2();
         game.removeItem(current);
+        playSound("sounds/collect.wav");
       } else if(item.toString().equals("Desk")){
         game.getP2().hitObstacle();
+        playSound("sounds/lose.wav");
+      } else if(item.toString().equals("Bomb")){
+        game.getP1().hitObstacle();
+        playSound("sounds/lose.wav");
+        game.removeItem(current);
       }
     }
     sendGame();
@@ -159,16 +177,27 @@ public class Client extends JPanel implements ActionListener, Serializable, KeyL
   public void keyPressed(KeyEvent e) {
     if (e.getKeyCode()==38){//Up Arrow
       game.moveUp2();
+      check();
     }else if (e.getKeyCode()==40){//Down Arrow
       game.moveDown2();
+      check();
     } else if ( e.getKeyCode() == 39 ) { //right
       game.moveRight2();
+      check();
     }else if (e.getKeyCode()==37){//left Arrow
       game.moveLeft2();
+      check();
+    } else if (e.getKeyCode()==32){
+      if(bombs<5){
+        bombs++;
+        int x = game.getP1().getX();
+        int y = game.getP1().getY();
+        Location current = new Location((x/100), (y/100));
+        game.putBomb(current);
+      }
     }
 
     sendGame();
-    check();
     repaint();
   }
 
